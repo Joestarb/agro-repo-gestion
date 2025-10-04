@@ -23,8 +23,15 @@
     "@nestjs/common": "^11.0.1",
     "@nestjs/core": "^11.0.1",
     "@nestjs/platform-express": "^11.0.1",
+    "axios": "^1.12.2",
+    "crypto": "^1.0.1",
+    "p-limit": "^7.1.1",
     "reflect-metadata": "^0.2.2",
-    "rxjs": "^7.8.1"
+    "rxjs": "^7.8.1",
+    "@agro-project/schemas": "workspace:*",
+    "@nestjs/mongoose": "^10.0.0",
+    "mongoose": "^8.19.0",
+    "@nestjs/schedule": "^2.2.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
