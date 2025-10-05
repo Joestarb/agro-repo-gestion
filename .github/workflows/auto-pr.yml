@@ -1,0 +1,75 @@
+name: Auto Pull Request to Develop
+
+on:
+  push:
+    branches:
+      - "feature/**"
+      - "feature-*"
+      - "feat/**"
+      - "feat-*"
+      - "bugfix/**"
+      - "bugfix-*"
+      - "hotfix/**"
+      - "hotfix-*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  create-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Create Pull Request to develop (if branch is ahead)
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.TOKEN_SECRET }}
+          script: |
+            const branch = process.env.GITHUB_REF.replace('refs/heads/','');
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+
+            core.info(`Branch detected: ${branch}`);
+
+            // Compare branch with develop to check if there are commits ahead
+            const comparison = await github.rest.repos.compareCommits({
+              owner,
+              repo,
+              base: 'develop',
+              head: branch
+            });
+
+            if (!comparison || comparison.data.ahead_by === 0) {
+              core.info('No hay commits únicos frente a develop; no se creará PR.');
+              return;
+            }
+
+            // Check if an open PR already exists from this branch to develop
+            const { data: prs } = await github.rest.pulls.list({
+              owner,
+              repo,
+              state: 'open',
+              head: `${owner}:${branch}`,
+              base: 'develop'
+            });
+
+            if (prs.length > 0) {
+              core.info(`Ya existe un PR abierto: ${prs[0].html_url}`);
+              return;
+            }
+
+            // Create the PR
+            const { data: pr } = await github.rest.pulls.create({
+              owner,
+              repo,
+              head: branch,
+              base: 'develop',
+              title: `Auto PR to develop - ${branch}`,
+              body: 'This PR was created automatically from a feature branch towards develop.'
+            });
+
+            core.info(`PR creado: ${pr.html_url}`);
