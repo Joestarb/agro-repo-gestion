@@ -1,14 +1,11 @@
-// src/app.module.ts
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { ScheduleModule } from '@nestjs/schedule';
 import { IngestionService } from './application/ingestion.service';
-import { SchedulerService } from './application/scheduler.service';
+import { WsClientService } from './application/ws-client.service';
 import { SensorEventSchema, LatestReadingSchema } from '@agro-project/schemas';
 
 @Module({
   imports: [
-    ScheduleModule.forRoot(),
     MongooseModule.forRoot(process.env.MONGODB_URI!, {
       dbName: process.env.DB_NAME,
     }),
@@ -16,8 +13,7 @@ import { SensorEventSchema, LatestReadingSchema } from '@agro-project/schemas';
       { name: 'SensorEvent', schema: SensorEventSchema },
       { name: 'LatestReading', schema: LatestReadingSchema },
     ]),
-
   ],
-  providers: [IngestionService, SchedulerService],
+  providers: [IngestionService, WsClientService],
 })
 export class AppModule {}
